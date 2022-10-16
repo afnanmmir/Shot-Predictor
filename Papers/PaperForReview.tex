@@ -49,7 +49,7 @@
 
 \author{Laith Altarabishi\\
 University of Texas at Austin\\
-{\tt\small <insert email>}
+{\tt\small laithaustin@utexas.edu}
 % For a paper whose authors are all at the same institution,
 % omit the following lines up until the closing ``}''.
 % Additional authors and addresses can be added with ``\and'',
@@ -87,27 +87,22 @@ and different shooting forms. This will require us to develop a method of captur
 \section{Related Works}
 \label{sec:formatting}
 
-All text must be in a two-column format.
-The total allowable size of the text area is $6\frac78$ inches (17.46 cm) wide by $8\frac78$ inches (22.54 cm) high.
-Columns are to be $3\frac14$ inches (8.25 cm) wide, with a $\frac{5}{16}$ inch (0.8 cm) space between them.
-The main title (on the first page) should begin 1 inch (2.54 cm) from the top edge of the page.
-The second and following pages should begin 1 inch (2.54 cm) from the top edge.
-On all pages, the bottom margin should be $1\frac{1}{8}$ inches (2.86 cm) from the bottom edge of the page for $8.5 \times 11$-inch paper;
-for A4 paper, approximately $1\frac{5}{8}$ inches (4.13 cm) from the bottom edge of the
-page.
-
 %-------------------------------------------------------------------------
-\subsection{Margins and page numbering}
+\subsection{Pose Estimation}
 
-All printed material, including text, illustrations, and charts, must be kept
-within a print area $6\frac{7}{8}$ inches (17.46 cm) wide by $8\frac{7}{8}$ inches (22.54 cm)
-high.
+Pose Estimation is a critical topic in computer vision that will intersect with our goal of trying to accurately capture the motion and actions of a person taking a shot in basketball. Pose estimation, in the context of 2D videos of humans, is the problem of localizing anatomical keypoints or joints in a frame by frame video or image [2]. To fulfill our goal of predicting the outcome of a basketball shot, it will be critical to assess the form of a player who's taking a shot - where form can be decomposed into various classifications of joints in space. Pose estimation methods can be categorized into bottom-up or top-down methodologies. Bottom-up methodologies start by estimating keypoints and body joints first, and then these points are clustered to form poses. In contrast, 
+top-down methodologies of pose estimation first run a person detector before decomposing each person into their respective body joints within detected bounding boxes [10]. Computational complexity is a major consideration for landmark pose estimation algorithms, and modern SOTA pose estimation algorithms deploy deep learning and CNNs to improve compuational overhead and speed [2]. We list some examples of prevalent and SOTA pose estimation models that have been employed and researched below.
 %
-Page numbers should be in the footer, centered and $\frac{3}{4}$ inches from the bottom of the page.
-The review version should have page numbers, yet the final version submitted as camera ready should not show any page numbers.
-The \LaTeX\ template takes care of this when used properly.
-
-
+\begin{quotation}
+  OpenPose: The first multi-person realtime 2D pose estimation system that uses a bottom-up approach that implements nonparametric representation to associate human keypoints and body parts with an individual in an image [2]. \\
+  \newline
+  \indent DeepPose: SOTA pose estimation method that uses DNNs to classify human body joints through the usage of cascading DNN regressors that produce high precision pose estimates [4]. \\
+  \newline
+  \indent AlphaPose: Multi-person SOTA realtime pose estimation system that outperforms OpenPose in AP score and has a high mAP score [9]. \\
+  \newline
+  \indent DeepCut: Proposes an approach to solving issues in both pose estimation and detection by using a partitioning and labeling formulation of a set of CNN part detectors [11].
+\end{quotation}
+%
 
 %-------------------------------------------------------------------------
 \subsection{Type style and fonts}
