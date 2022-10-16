@@ -58,7 +58,7 @@ University of Texas at Austin\\
 \and
 Sidharth Babu\\
 University of Texas at Austin\\
-{\tt\small <insert email>}
+{\tt\small sidharth.n.babu@utexas.edu}
 \and
 Afnan Mir \\
 University of Texas at Austin\\
@@ -246,6 +246,55 @@ between the shooter and the hoop, and the speed of the shot. We will be attempti
 shot, as each stage can have a significant impact on the outcome of the shot. We will then take this feature vector and put it through a classification model.
 We will perform binary classification and predict whether a shot will go in or not.
 
+\subsection{Pose Estimation}
+As far as pose estimation goes, it seems that a bottom up approach to pose estimation will be the best approach for our use case, as the bottom up approach is the
+current state of the art when it comes to pose estimation and is computationally less expensive [12]. There are a few state of the art bottom up pose estimation libraries that we could potentially use. These
+libraries include OpenPose, AlphaPose, DeepCut, and MoveNet. We will test these libraries on their latency and accuracy. With a basketball shot, we want minimum latency
+as well as an ability to run at a high frames per second (FPS) quantity. We will use these metrics as well as an accuracy score on a validation set to determine which pose
+estimation library to use. Once the library is decided, we will include this library into our pipeline to create features from our input video.
+
+\subsection{Feature Extraction and Classification}
+Before we get into creating features, we need to define how we want to create features using continuous video. There are three stages we can define: the loading of the shot, the propulsion of the ball from below the waist
+to eye-level, and the release. At these three different stages, we can define three methods for creating feature vectors.
+
+When the shooter loads the ball, the general pose/angle between specific key points is all that matters. However, this stage can take different amounts of time. To combat this,
+we can take the average of each desired angle for the whole time the shooter is at this stage.
+
+When the shooter is bringing the ball from the loading point to the release point, the movement is more important than key points. For example, the movement should not be too fast, and it should generally be straight up.
+Therefore, it would be optimal for us to generate a movement vector for each key point we care about, and also encode the speed component to vectorize this motion.
+
+When the ball is released, the general pose is again more important. Additionally, we would like to encode information about the angles between the hoop and the shooter's release point. So, for this case, we
+will again use angles of specific key points that we care about in our feature vector as well as information about the relation between the hoop and the shooter.
+
+To perform binary classification, there are two methods we can use. We could either concatenate all of these feature vectors and input it into one big classification model that will perform the prediction. Alternatively, 
+we could put each feature vector through its own classification model and perform some form of weighted majority voting to make our prediction. Both will be tested to determine which method to use.
+
+We can also test various techniques of classification to see which performs the best. We can test between Logistic Regression, Support Vector Machine, Random Forest, and an MLP model. We can use cross validation to determine which
+of these model types will be optimal for us.
+
+\subsection{Training Procedures}
+In order to train our model(s), we will create our own training data by having a subject shoot free throws numerous times, capturing the feature vectors and labelling the data as makes or misses.
+
+\section{Timeline}
+We propose the following timeline, where week 1 represents the week of October 17th:
+\begin{itemize}
+  \item Week 1: \begin{itemize}
+    \item Familiarize ourselves with pose estimation libraries and how to use them.
+    \item Perform tests on each pose estimation library to determin which library to use
+  \end{itemize}
+  \item Week 2: \begin{itemize}
+    \item Collect training data of free throws
+    \item Test our pose estimation library on training data and see the data that we can obtain.
+  \end{itemize}
+  \item Week 3, 4, and 5: \begin{itemize}
+    \item Develop algorithm for feature extraction from shot motion
+    \item Test different types of classification on the data and determine which model to use
+  \end{itemize}
+  \item Week 6: \begin{itemize}
+    \item Evaluate/test final model
+    \item Write final report
+  \end{itemize}
+\end{itemize}
 
 %%%%%%%%% REFERENCES
 {\small
