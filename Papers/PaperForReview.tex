@@ -104,27 +104,27 @@ top-down methodologies of pose estimation first run a person detector before dec
 \end{quotation}
 %
  
-Before a posture recognition algorithm can be made, though, there needs to be an understanding of what postures we are trying to recognize [1]. One example solution is shown below. 
-%
-\begin{quotation}
-  Level 1: Divide posture into two categories based on whether or not the motion is cyclic \\
-  \indent - Instantaneous Movement 
-  \indent - Continuous Movement 
-  \newline
-  \indent Level 2: Divide posture into seven postures \\
-  \indent - Walking 
-  \indent - Running 
-  \indent - Dribbling 
-  \indent - Jumping 
-  \indent - Shooting 
-  \indent - Passing 
-  \indent - Catching 
-\end{quotation}
-%
+%-------------------------------------------------------------------------
+\subsection{Basketball and Pose Estimation}
 
-Notice how these actions are exclusive to basketball. The algorithm is only concerned with basketball, and will deem all other actions as unnecessary as such. 
-A popular tool used for key feature detection in order to track certain postures is SIFT [1]. The upper and lower limbs are pivotal in determining what an athlete is doing, 
-so using SIFT to identify and track limbs would be useful for understanding an athlete's posture. 
+Collecting and analyzing basketball player's posture data is important and 
+highly sought after in the scientific basketball community in order to help
+coaches improve their training plan, and help players maximize their training 
+outputs. As it stands, the current technology faces some combination of 
+high inefficiency or high error rates. Rather than using wearable, inertial sensor
+recognition equipment, which tends to be expensive and not applicable to how a 
+real game is played, it was decided to use posture recognition via video instead.
+In order to improve the athlete's training effect, a gesture recognition method 
+based on feature extraction and machine learning was implemented in order to 
+acquire the upper limb and lower limb features needed to classify a posture.  
+The action posture data of players was collected through image feature extraction
+methods, and with the method of feature selection, accurate classification and recognition
+of basketball shooting gestures can be made. This paper is similar to our project because 
+it attempts to take and encode data about motion of a player through pose estimation to 
+make predictions, but our project solely focuses on the motion of a shot, and predicting 
+the outcome of the shot. 
+
+%
 
 %-------------------------------------------------------------------------
 \subsection{Object Detection}
