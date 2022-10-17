@@ -66,7 +66,7 @@ University of Texas at Austin\\
 \and
 Zayam Tariq \\
 University of Texas at Austin\\
-{\tt\small <insert email>}
+{\tt\small zayamtariq@utexas.edu}
 }
 \maketitle
 
@@ -103,6 +103,27 @@ top-down methodologies of pose estimation first run a person detector before dec
   \indent DeepCut: Proposes an approach to solving issues in both pose estimation and detection by using a partitioning and labeling formulation of a set of CNN part detectors [11].
 \end{quotation}
 %
+ 
+Before a posture recognition algorithm can be made, though, there needs to be an understanding of what postures we are trying to recognize [1]. One example solution is shown below. 
+%
+\begin{quotation}
+  Level 1: Divide posture into two categories based on whether or not the motion is cyclic \\
+  \indent - Instantaneous Movement 
+  \indent - Continuous Movement 
+  \newline
+  \indent Level 2: Divide posture into seven postures \\
+  \indent - Walking 
+  \indent - Running 
+  \indent - Dribbling 
+  \indent - Jumping 
+  \indent - Shooting 
+  \indent - Passing 
+  \indent - Catching 
+\end{quotation}
+%
+
+Notice how these actions are exclusive to basketball. The algorithm is only concerned with basketball, and will deem all other actions as unnecessary as such. 
+
 
 %-------------------------------------------------------------------------
 \subsection{Type style and fonts}
@@ -303,3 +324,4 @@ We propose the following timeline, where week 1 represents the week of October 1
 }
 
 \end{document}
+
