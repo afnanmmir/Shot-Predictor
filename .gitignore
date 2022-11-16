@@ -288,3 +288,5 @@ results/*
 *.fls
 *.fdb_latexmk
 *.aux
+*.mp4
+*.venv/
