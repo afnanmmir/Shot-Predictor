@@ -13,6 +13,7 @@ import pandas as pd
 from moviepy.editor import *
 from IPython.display import HTML, display
 import time
+import os
 
 
 KEYPOINT_DICT = {
@@ -277,9 +278,10 @@ def downsample_video(video: str, num_frames: int):
     output_file:
         - the filename to put the downsampled video in, with the mp4 extension omitted.
     """
-    clip = VideoFileClip(video + ".mp4")
+    clip = VideoFileClip(video)
     duration = clip.duration
-    clip_time = min(duration, 2)
+    # clip_time = min(duration, 1.8)
+    clip_time = 1.5
     video_clipped = clip.subclip(0, clip_time)
     video_downsampled = video_clipped.set_fps(num_frames/clip_time)
     return video_downsampled.iter_frames()
@@ -290,7 +292,6 @@ def downsample_video(video: str, num_frames: int):
 
 
 def main():
-    start = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=str, help="file name of the video (no mp4 suffix)")
     parser.add_argument("input_size", type=int, help="input size of the image")
@@ -301,27 +302,40 @@ def main():
     input_size = int(args.input_size)
     output_file = args.output_file
 
-    #TODO: Downsample the clip that is passed in as "file" to a static framerate
+    #TODO: Iterate over the provided folder and run the keypoint generation on each contained file
+    makeFiles = os.listdir(f"{file_name}/makes")
+    makeFiles = [f"{file_name}/makes/"+name for name in makeFiles]
 
-    _filename = f"{file_name}.mp4"
-    videogen = downsample_video(file_name, 60)
-    # videogen = video
-    # model = load_model("https://tfhub.dev/google/movenet/singlepose/thunder/4")
-    model = load_model("./saved_model")
-    row = np.asarray([])
-    for frame in videogen:
-        image = frame
-        input_image = tf.expand_dims(image, axis = 0)
-        input_image = tf.image.resize_with_pad(input_image, input_size, input_size)
-        keypoints_and_scores = movenet(model, input_image)
-        keypoints = [x for i,x in enumerate(keypoints_and_scores.flatten()) if i%3!=2 or i==0]
-        row = np.append(row, keypoints)
-    series = pd.Series(row)
-    df = pd.DataFrame([series.tolist()], columns=series.index)
-    df.to_csv(f"{output_file}.csv",mode='a+',index=False, header=False)
-    end = time.time()
-    print("length of row: "+str(len(series.tolist())))
-    print("time elapsed (s): "+str(end-start))
+    missFiles = os.listdir(f"{file_name}/misses")
+    missFiles = [f"{file_name}/misses/"+name for name in missFiles]
+
+    allFiles = makeFiles + missFiles
+
+    for fname in allFiles:
+        start = time.time()
+        videogen = downsample_video(fname, 60)
+        model = load_model("./saved_model")
+        row = np.asarray([])
+        for frame in videogen:
+            image = frame
+            input_image = tf.expand_dims(image, axis = 0)
+            input_image = tf.image.resize_with_pad(input_image, input_size, input_size)
+            keypoints_and_scores = movenet(model, input_image)
+            keypoints = [x for i,x in enumerate(keypoints_and_scores.flatten()) if i%3!=2 or i==0]
+            row = np.append(row, keypoints)
+        series = pd.Series(row)
+        if('misses' in fname):
+            #concat a 0 to the end of the array
+            series = pd.concat((pd.Series(0),series))
+        elif('makes' in fname):
+            # concat a 1 to the end of the array
+            series = pd.concat((pd.Series(1),series))
+
+        df = pd.DataFrame([series.tolist()], columns=series.index)
+        df.to_csv(f"{output_file}.csv",mode='a+',index=False, header=False)
+        end = time.time()
+        print("length of row: "+str(len(series.tolist())))
+        print("time elapsed (s): "+str(end-start))
 
 if __name__ == '__main__':
     main()
