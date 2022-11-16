@@ -302,7 +302,6 @@ def main():
     input_size = int(args.input_size)
     output_file = args.output_file
 
-    #TODO: Iterate over the provided folder and run the keypoint generation on each contained file
     makeFiles = os.listdir(f"{file_name}/makes")
     makeFiles = [f"{file_name}/makes/"+name for name in makeFiles]
 
