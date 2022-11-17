@@ -290,3 +290,4 @@ results/*
 *.aux
 *.mp4
 *.venv/
+models/rev1_catboost/catboost_info/*
