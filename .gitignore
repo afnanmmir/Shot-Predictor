@@ -291,3 +291,4 @@ results/*
 *.mp4
 *.venv/
 catboost_info
+*.gif
