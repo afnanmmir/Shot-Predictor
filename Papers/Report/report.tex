@@ -111,7 +111,7 @@ top-down methodologies of pose estimation first run a person detector before dec
   \indent DeepCut: Proposes an approach to solving issues in both pose estimation and detection by using a partitioning and labeling formulation of a set of CNN part detectors \cite{DeepCut}.
 \end{quotation}
 
-Pose estimation attempts to detect the location of 17 keypoints on a human body, as seen in \ref{fig:pose}. These keypoints include key joints such as
+Pose estimation attempts to detect the location of 17 keypoints on a human body, as seen in Figure \ref{fig:pose}. These keypoints include key joints such as
 the knee, elbow, shoulder, and wrist, which can be vital in determining the form of a free throw.
 \begin{figure}[h]
   \centering
@@ -150,15 +150,43 @@ In recent years, object detection algorithms have evolved greatly and most SOTA 
 %------------------------------------------------------------------------
 \section{Methodology}
 \subsection{General Overview}
-We will have a camera taking in video input of a player shooting the basketball, potentially from two different angles.
-One angle would be a side view of the shooter that can capture the relative positions of the shooter and the hoop, and the other
-would be a head-on view of the of the shooter to capture the full pose estimation of the shooter.
+% We will have a camera taking in video input of a player shooting the basketball, potentially from two different angles.
+% One angle would be a side view of the shooter that can capture the relative positions of the shooter and the hoop, and the other
+% would be a head-on view of the of the shooter to capture the full pose estimation of the shooter.
 
-In the background, we will have our pose estimation algorithm running to capture the pose estimation of the shooter which will be used
-to make our predictions. Additionally, we will potentially be retrieving other data to create our feature vector, including the angle relationship
-between the shooter and the hoop, and the speed of the shot. We will be attempting to capture the pose estimation at multiple stages of the
-shot, as each stage can have a significant impact on the outcome of the shot. We will then take this feature vector and put it through a classification model.
-We will perform binary classification and predict whether a shot will go in or not.
+% In the background, we will have our pose estimation algorithm running to capture the pose estimation of the shooter which will be used
+% to make our predictions. Additionally, we will potentially be retrieving other data to create our feature vector, including the angle relationship
+% between the shooter and the hoop, and the speed of the shot. We will be attempting to capture the pose estimation at multiple stages of the
+% shot, as each stage can have a significant impact on the outcome of the shot. We will then take this feature vector and put it through a classification model.
+% We will perform binary classification and predict whether a shot will go in or not.
+The high-level overview of our end-to-end pipeline is shown in Figure \ref{fig:flowchart}. We start off by capturing clips of a test subject shooting a free throw. This will be our 
+original data. We first want to downsample the video as we assume that many of the frames will be redundant and take up unnecessary computation time. After this, we perform pose estimation
+on all the frames of each video to get the keypoints of our test subject for each video clip. Using the pose estimation data, we perform
+feature extraction to generate feature vectors for each video clip according to some convention. This will be elaborated on in a later section. 
+
+These feature vectors will be the training and testing data that we use for our classification model. We will want to split this data into training
+and testing sets. We will train our classification model on the training set and generate predictions using our testing set.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/cv_pipeline_real.png}
+  \caption{Overview of Pipeline}
+  \label{fig:flowchart}
+\end{figure}
+
+\subsection{Data Collection}
+To fit the scope of our project, we wanted the shot data be as controlled as possible to prevent unwanted variations
+in our data. To do this, we collected our own data, where we had our test subject always shoot from the free throw line
+and had a camera in a fixed position in front of the test subject to capture their form. The set up can be seen in Figure \ref{fig:ft_data}.
+We genereated approxiamately 300 clips of our test subject shooting free throws. Additionally, for this project, we wanted to detect major changes
+in shooting forms that could affect the outcome of a shot. Therefore, our test subject shot some of their shots as he normally would, with the intent
+of making it, and some of their shots with purposefully bad form, with the intent of missing. We had a relatively even split of these two types of shots. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/data_collection.png}
+  \caption{Free Throw}
+  \label{fig:ft_data}
+\end{figure}
 
 \subsection{Pose Estimation}
 As far as pose estimation goes, it seems that a bottom up approach to pose estimation will be the best approach for our use case, as the bottom up approach is the
