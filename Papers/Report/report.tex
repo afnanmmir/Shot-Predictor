@@ -189,54 +189,79 @@ of making it, and some of their shots with purposefully bad form, with the inten
 \end{figure}
 
 \subsection{Pose Estimation}
-As far as pose estimation goes, it seems that a bottom up approach to pose estimation will be the best approach for our use case, as the bottom up approach is the
-current state of the art when it comes to pose estimation and is computationally less expensive \cite{Datagen}. There are a few state of the art bottom up pose estimation libraries that we could potentially use. These
-libraries include OpenPose, AlphaPose, DeepCut, and MoveNet. We will test these libraries on their latency and accuracy. With a basketball shot, we want minimum latency
-as well as an ability to run at a high frames per second (FPS) quantity. We will use these metrics as well as an accuracy score on a validation set to determine which pose
-estimation library to use. Once the library is decided, we will include this library into our pipeline to create features from our input video.
+For our pose estimation, we decided between using OpenPose and MoveNet pose estimators. These are both bottom up approaches to pose estimation. We decided on using bottom up pose estimators as this is the
+current state of the art, and it is computationally less expensive \cite{Datagen}. Our first choice was OpenPose, which is considered the SOTA pose estimator. However, we found that OpenPose had some issues 
+with our data. We found that having the basketball greatly hindered the performance of OpenPose detecting our test subject, as seen in Figure \ref{fig:openpose}. Additionally, we found OpenPose to be relatively slow
+on the edge compared to MoveNet. In contrast, MoveNet was not hindered as much by the basketball and was much faster on the edge. Therefore, we decided to move forward with MoveNet as our pose estimator.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.40\textwidth]{imgs/openpose_bad.png}
+  \caption{OpenPose Pose Detection}
+  \label{fig:openpose}
+\end{figure}
 
-\subsection{Feature Extraction and Classification}
-Before we get into creating features, we need to define how we want to create features using continuous video. There are three stages we can define: the loading of the shot, the propulsion of the ball from below the waist
-to eye-level, and the release \cite{FreeThrow}. At these three different stages, we can define three methods for creating feature vectors.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.40\textwidth]{imgs/movenet_good.png}
+  \caption{MoveNet Pose Detection}
+  \label{fig:movenet}
+\end{figure}
 
-When the shooter loads the ball, the general pose/angle between specific key points is all that matters. However, this stage can take different amounts of time. To combat this,
-we can take the average of each desired angle for the whole time the shooter is at this stage.
+\subsection{Feature Vector Generation}
+Before we can train a classification model to predict the outcome of a shot in a video clip, we need to define how
+we are going to generate the feature vectors for each video clip. 
 
-When the shooter is bringing the ball from the loading point to the release point, the movement is more important than key points. For example, the movement should not be too fast, and it should generally be straight up.
-Therefore, it would be optimal for us to generate a movement vector for each key point we care about, and also encode the speed component to vectorize this motion.
+As stated previously, we first want to downsample the video to reduce the number
+of frames we are processing, as many of the frames will be redundant. Our initial approach was to
+downsample the video by taking every nth frame, where n is a hyperparameter. However, we soon realized
+that our clips were not all the same length, which would mean we would receive an inconsistent number of
+frames per clip, which could potentially lead to dimensionality issues when we created our feature vectors, depending on our approach.
+To solve this, we decided to take an absolute number of frames per clip, which we decided to be 60.
 
-When the ball is released, the general pose is again more important. Additionally, we would like to encode information about the angles between the hoop and the shooter's release point. So, for this case, we
-will again use angles of specific key points that we care about in our feature vector as well as information about the relation between the hoop and the shooter.
+After downsampling, we perform pose estimation on each frame of the video clip. Using the pose estimation data, we defined two possible apporaches
+to feature generation:
+\begin{enumerate}
+  \item Concatenate the pose estimation data from each frame of the clip into a single feature vector.
+  \item Use the pose estimation data from each frame of the clip to generate a feature vector for each frame, and perform majority voting the feature vectors to generate the final prediction.
+\end{enumerate}
 
-To perform binary classification, there are two methods we can use. We could either concatenate all of these feature vectors and input it into one big classification model that will perform the prediction. Alternatively, 
-we could put each feature vector through its own classification model and perform some form of weighted majority voting to make our prediction. Both will be tested to determine which method to use.
+Our pose estimator generates a set of 17 two dimensional coordinates, $S=\{(x_1, y_1), (x_2, y_2), \dots, (x_{17}, y_{17})\}$, where each coordinate $(x_i, y_i)$ is the
+position on the image of keypoint $i$. For both approaches on each frame $i$, we concatenate all the coordinates to create a feature vector $v_{ij} \in \mathbb{R}^{34}$, where $v_{ij}$ is
+a feature vector for frame $j$ of clip $i$. For our first approach, we take all the feature vectors for a single clip and concatenate them together, as seen in Figure \ref{fig:feature_vector}.
+This takes 60 feature vectors of 34 dimensions and creates a feature vector $v_i \in \mathbb{R}^{2040}$, where $v_i$ is the feature vector for clip $i$. In contrast, for our second approach, we treat
+each feature vector as a separate data point, and we perform a form of majority voting at the classification stage to generate our final prediction. Both of these approaches were tested, and performance
+scores were generated.
 
-We can also test various techniques of classification to see which performs the best. We can test between Logistic Regression, Support Vector Machine, Random Forest, and an MLP model. We can use cross validation to determine which
-of these model types will be optimal for us.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth, height=0.27\textwidth]{imgs/concat_vectors.png}
+  \caption{First Approach to Feature Vector Generation}
+  \label{fig:feature_vector}
+\end{figure}
 
-\subsection{Training Procedures}
-In order to train our model(s), we will create our own training data by having a subject shoot free throws numerous times, capturing the feature vectors and labelling the data as makes or misses.
+\subsection{Classification Model}
+After we have generated our feature vectors, we used these vectors to train a classification model. We tested various classifiction models such as
+Gradient Boosted Trees (Catboost), Support Vector Machines, Multi-Layer Perceptrons, and K Nearest Neighbors \cite{catboost}\cite{inproceedings}\cite{MURTAGH1991183}. We
+did preliminary testing on the classification models by measuring the performance of each model on our first feature vector approach as a means of 
+choosing the best model for us to do a deeper dive on. To measure the performance of each model, we used accuracy, as generating the AUC score was not 
+feasible for some of the models. Table \ref{tab:table1} shows us the results of each model we tested:
+\begin{table}[h]
+  \begin{center}
+    \caption{Accuracy Scores for Classification Models}
+    \label{tab:table1}
+    \begin{tabular}{l | r}
+      \textbf{Model} & \textbf{Accuracy} \\
+      \hline
+      Catboost Gradient Boosting Tree & 0.636 \\
+      Support Vector Machine & 0.580 \\
+      Multi-Layer Perceptron & 0.556 \\
+      K Nearest Neighbors & 0.602 \\
+    \end{tabular}
+  \end{center}
+\end{table}
 
-\section{Timeline}
-We propose the following timeline, where week 1 represents the week of October 17th:
-\begin{itemize}
-  \item Week 1: \begin{itemize}
-    \item Familiarize ourselves with pose estimation libraries and how to use them.
-    \item Perform tests on each pose estimation library to determin which library to use
-  \end{itemize}
-  \item Week 2: \begin{itemize}
-    \item Collect training data of free throws
-    \item Test our pose estimation library on training data and see the data that we can obtain.
-  \end{itemize}
-  \item Week 3, 4, and 5: \begin{itemize}
-    \item Develop algorithm for feature extraction from shot motion
-    \item Test different types of classification on the data and determine which model to use
-  \end{itemize}
-  \item Week 6: \begin{itemize}
-    \item Evaluate/test final model
-    \item Write final report
-  \end{itemize}
-\end{itemize}
+From the results, we see that the Catboost model got the highest accuracy score. As a result, we chose this model to perform the rest of our experiments on.
+
 
 %%%%%%%%% REFERENCES
 {\small
