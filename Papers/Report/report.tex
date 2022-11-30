@@ -262,7 +262,15 @@ feasible for some of the models. Table \ref{tab:table1} shows us the results of 
 
 From the results, we see that the Catboost model got the highest accuracy score. As a result, we chose this model to perform the rest of our experiments on.
 
-
+\section{Results}
+In this section, we present and discuss in detail the results of our experiments. In all of these experiments, we used MoveNet as our pose estimator and Catboost
+Gradient Boosting Tree as our classification model, as explained in the previous section.
+\subsection{First Approach to Feature Vector Generation}
+In our first experiment, did a more extensive test on our first approach to feature vector generation. In our preliminary test,
+we did not use our full set of data, as we generated more data after this preliminary experiment. Additionally, we would like to evaluate
+the model on ROC-AUC score. Lastly, as we repeatedly retrained and reevaluated the model, we were getting performance scores that varied 
+to some extent. Because of this, we decided to create a sample distribution of ROC-AUC scores we achieved for each iteration of our model. To do this,
+we ran our model 100 times, each with a randomized train-test split. We then recorded each ROC-AUC score and plotted the histogram of the scores.
 %%%%%%%%% REFERENCES
 {\small
 \bibliographystyle{ieee_fullname}
