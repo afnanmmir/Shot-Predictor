@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
+\usepackage{adjustbox}
 
 
 % It is strongly recommended to use hyperref, especially for the review version.
@@ -266,11 +267,169 @@ From the results, we see that the Catboost model got the highest accuracy score.
 In this section, we present and discuss in detail the results of our experiments. In all of these experiments, we used MoveNet as our pose estimator and Catboost
 Gradient Boosting Tree as our classification model, as explained in the previous section.
 \subsection{First Approach to Feature Vector Generation}
-In our first experiment, did a more extensive test on our first approach to feature vector generation. In our preliminary test,
+In our first experiment, we did a more extensive test on our first approach to feature vector generation. In our preliminary test,
 we did not use our full set of data, as we generated more data after this preliminary experiment. Additionally, we would like to evaluate
 the model on ROC-AUC score. Lastly, as we repeatedly retrained and reevaluated the model, we were getting performance scores that varied 
 to some extent. Because of this, we decided to create a sample distribution of ROC-AUC scores we achieved for each iteration of our model. To do this,
 we ran our model 100 times, each with a randomized train-test split. We then recorded each ROC-AUC score and plotted the histogram of the scores.
+Figure \ref{fig:rocauc1} shows the distribution of our ROC-AUC scores for our first approach to feature generation.
+
+% insert figure here
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/approach1_rocauc.png}
+  \caption{Distribution of ROC-AUC Scores for First Approach to Feature Vector Generation}
+  \label{fig:rocauc1}
+\end{figure}
+We produced a mean ROC-AUC score of 0.638, with a standard deviation of 0.043. We also produced a histogram distribution of our accuracy scores, and
+this distribution can be seen in Figure \ref{fig:accuracy1}.
+% insert figure here
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/approach1_acc.png}
+  \caption{Distribution of Accuracy Scores for First Approach to Feature Vector Generation}
+  \label{fig:accuracy1}
+\end{figure}
+We produced a mean accuracy score of 0.570, with a standard deviation of 0.044.
+
+From these results, we see a performance that is better than random guessing, but not by much. Additionally, there is some 
+nontrivial amount of deviation in the performance.
+
+\subsection{Second Approach to Feature Vector Generation}
+In our second experiment, we performed extensive performance tests on our second approach to feature generation. Firstly, we wanted
+to see how effective our classification model would be classifying each frame of every video clip independently as a make or miss.
+This meant we had to label each feature vector for each frame as a make or miss, depending on what the outcome of the clip it originated from.
+We then trained our classification model on this data and evaluated its performance. Like we did before, we ran our model 100 times, each with a randomized train-test split
+and generated a distribution of accuracy scores. We can see the results in Figure \ref{fig:frame_class_results}. From this distribution, we can see that our classification model
+does fairly well in classifying each frame as part of a make clip or a miss clip. 
+
+With this in mind, we decided that we could improve performance of predicting the outcome of each clip
+by training the model on singular frames and producing our final prediction by performing some form of a majority vote on each frame for a given clip. This means, to predict the outcome of
+a certain clip, we would input the 60 associated feature vectors into the model foe each frame. We predict the outcome for each of these frames, and if at least half of the frames
+predict a make, our final output will be a make. If at least half of the frames predict a miss, our final output will be a miss. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/frame_class_results.png}
+  \caption{Distribution of Accuracy Scores for Frame Classification}
+  \label{fig:frame_class_results}
+\end{figure}
+
+We ran this pipeline 100 times to generate a distribution of ROC-AUC scores and accuracy scores. These can be seen in Figure \ref{fig:rocauc2} and Figure \ref{fig:accuracy2} respectively.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/equal_bias_roc.png}
+  \caption{Distribution of ROC-AUC Scores for Equal Weighted Majority Voting}
+  \label{fig:rocauc2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{imgs/equal_bias_acc.png}
+  \caption{Distribution of Accuracy Scores for Equal Weighted Majority Voting}
+  \label{fig:accuracy2}
+\end{figure}
+
+We achieved a mean ROC-AUC score of 0.794 with a standard deviation of 0.063 and a mean accuracy score of 0.726
+with a standard deviation of 0.068. Though the standard deviation is slightly higher, the overall performance of this approach seems
+to be much better than our first approach, with both ROC-AUC and accuracy scores increasing significantly.
+
+\subsection{Tuning the Majority Voting Threshold}
+After evaluating majority voting with equal weights, we wanted to see if we could improve the performance of this by tuning the threshold of our majority vote. We tried three different thresholds: 0.25, 0.5, and 0.75. For 
+each threshold we, again, ran 100 iterations and generated a distribution of ROC-AUC scores and accuracy scores. The statistics of the distributions for each of the thresholds can be seen in Table \ref{tab:table2} and Table \ref{tab:table3}.
+
+\begin{table}
+  \begin{center}
+    \begin{adjustbox}{width=0.47\textwidth}
+    \begin{tabular}{|c|c|c|}
+      \textbf{Threshold} & \textbf{Mean of ROC-AUC} & \textbf{Standard Deviation of ROC-AUC} \\
+      \hline 
+      0.25 & 0.795 & 0.067  \\
+      0.50 & 0.794 & 0.063  \\
+      0.75 & 0.793 & 0.058  \\
+    \end{tabular}
+    \end{adjustbox}
+    \caption{Statistics of ROC-AUC Majority Voting Threshold Experiments}
+    \label{tab:table2}
+  \end{center}
+\end{table}
+\begin{table}
+  \begin{center}
+    \begin{adjustbox}{width=0.47\textwidth}
+    \begin{tabular}{|c|c|c|}
+      \textbf{Threshold} & \textbf{Mean of Accuracy} & \textbf{Standard Deviation of Accuracy} \\
+      \hline 
+      0.25 & 0.679 & 0.072  \\
+      0.50 & 0.726 & 0.068  \\
+      0.75 & 0.688 & 0.062  \\
+    \end{tabular}
+    \end{adjustbox}
+    \caption{Statistics of Accuracy Majority Voting Threshold Experiments}
+    \label{tab:table3}
+  \end{center}
+\end{table}
+
+We see that the mean ROC-AUC score is highest for a threshold of 0.25, but only by a very small margin. In general, the ROC-AUC scores are quite similar, but it is clear
+that when measuring performance by accuracy, the threshold of 0.5 tends to perform the best. The combination of the ROC-AUC scores and accuracy scores lead us to believe that
+the threshold of 0.5 is the best choice.
+
+\subsection{Modifying Majority Voting Criteria}
+Our final experiment was to see if we could improve performance of the majority voting by using the median of the soft probability scores instead of the mean. This was done in
+an attempt to reduce the effect of outliers on the vote. Again, we ran this 100 times and generated a performance score distribution. We attempted to use three different thresholding
+values for this as well. The statistics of the ROC-AUC scores and accuracy scores
+
+\begin{table}[h]
+  \begin{center}
+    \begin{adjustbox}{width=0.47\textwidth}
+    \begin{tabular}{|c|c|c|}
+      \textbf{Threshold} & \textbf{Mean of ROC-AUC} & \textbf{Standard Deviation of ROC-AUC} \\
+      \hline 
+      0.25 & 0.783 & 0.057  \\
+      0.50 & 0.798 & 0.053  \\
+      0.75 & 0.793 & 0.059  \\
+    \end{tabular}
+    \end{adjustbox}
+    \caption{Statistics of ROC-AUC Median Voting Threshold Experiments}
+    \label{tab:table4}
+  \end{center}
+\end{table}
+\begin{table}[h]
+  \begin{center}
+    \begin{adjustbox}{width=0.47\textwidth}
+    \begin{tabular}{|c|c|c|}
+      \textbf{Threshold} & \textbf{Mean of Accuracy} & \textbf{Standard Deviation of Accuracy} \\
+      \hline 
+      0.25 & 0.688 & 0.057  \\
+      0.50 & 0.733 & 0.054  \\
+      0.75 & 0.663 & 0.078  \\
+    \end{tabular}
+    \end{adjustbox}
+    \caption{Statistics of Accuracy Median Voting Threshold Experiments}
+    \label{tab:table5}
+  \end{center}
+\end{table}
+
+From this, we see that a threshold value of 0.5 for the median voting performs marginally better, but not significantly
+enough to make a real difference.
+
+\section{Analysis}
+From our experiments we concluded that our second approach to feature generation and classification was
+far more successful than our first approach. We believe that the main issue with our first approach was
+insufficient data. We were only able to generate about 300 total clips, which meant we had about 210
+feature vectors to train on and 90 to test on. This simply was not enough data to train a robust classifier.
+
+When we trained the model on all the frames, we had a much larger dataset to train on, as each clip would give us 60
+feature vectors. This gives the model more of a chance to learn patterns in the data to make its predictions. 
+
+A deeper dive into our second approach to feature vector generation shows us that a threshold of 0.50 for the majority vote
+performs the best, and a median vote goes not significantly change the performance.
+
+\section{Conclusion}
+
+
+
+
 %%%%%%%%% REFERENCES
 {\small
 \bibliographystyle{ieee_fullname}
