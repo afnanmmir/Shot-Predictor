@@ -46,7 +46,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE - PLEASE UPDATE
-\title{Applying Pose Estimation to Predict the Outcome of Basketball Shots}
+\title{Applying Pose Estimation to Predict the Outcome of A Free Throw}
 
 \author{Laith Altarabishi\\
 University of Texas at Austin\\
@@ -413,7 +413,17 @@ values for this as well. The statistics of the ROC-AUC scores and accuracy score
 From this, we see that a threshold value of 0.5 for the median voting performs marginally better, but not significantly
 enough to make a real difference.
 
+\subsection{Other Explorations}
+After achieving these results, we explored other methods that have historically been useful in improving the performance of
+classification models. Principal Component Analysis (PCA) was the first method we explored to attempt to find the most significant
+features of our features. However, when we performed the PCA transform, we greatly hindered the performance of our model to about the
+performance of random guessing.
+
+Additionally, we attempted stacking models together to improve our performance. We stacked many different classification models together
+and attempted to use the majority voting method to improve the performance. However, this also hindered the performance of our model. 
+
 \section{Analysis}
+\subsection{Performance Analysis}
 From our experiments we concluded that our second approach to feature generation and classification was
 far more successful than our first approach. We believe that the main issue with our first approach was
 insufficient data. We were only able to generate about 300 total clips, which meant we had about 210
@@ -425,7 +435,41 @@ feature vectors. This gives the model more of a chance to learn patterns in the 
 A deeper dive into our second approach to feature vector generation shows us that a threshold of 0.50 for the majority vote
 performs the best, and a median vote goes not significantly change the performance.
 
-\section{Conclusion}
+\subsection{Pitfalls and Issues}
+Although we were able to achieve adequate performance metrics with our approach, there are still some issues that
+our current method cannot overcome.
+
+\subsubsection{Invariance to Camera Position}
+
+One of the main issues with our current approach is that our feature vector generation highly sensitive to the position of our camera. For our data collection,
+we held the camera in a fixed position to record our test subject shooting free throws, and our feature vectors used the absolute coordinates of each of the 17 key points
+to create our feature vector for a frame. This means that if we were to move the camera, or even if the person were to move, the feature vectors would be completely different, 
+even if the shooting form is the same.
+
+In order to fix this issue, we could use relative coordinates, fixing one of the key points as the origin, and calculating the relative coordinates of the other 16 key points.
+This would allow our feature representation to be more invariant to the position of the camera or the test subject. Additionally, we could use a feature representation that took into
+account the angles between the key points because the angles of joints are very important in determining the form of a shot. Using the angles would also make the feature representation
+not depend on the absolute position.
+
+\subsubsection{Loss of Temporal Information}
+
+In our current representation, we are performing a majority vote on all the frames of a clip, but when we do this, we lose all temporal information and the sequential nature of the shot.
+This means, theoretically, we could shuffle the frames of the clip, or even reverse the video, and the model will still predict the same. 
+
+In order to capture the sequential
+nature of the shooting form, it would have been beter to potentially use a recurrent neural network to capture the temporal information. 
+
+\section{Conclusion and Future Works}
+In this paper, we attempted to leverage pose estimation to help predict the outcome of a free throw. This involved collecting data
+of a test subject shooting free throws, and using the pose estimation to generate feature vectors, and training a 
+classification model to predict the outcome of a shot.
+
+Through this process, we learned a great deal about how pose estimation works and the methodology behind generating feature vectors from data as well as
+the nuances of training classification models.
+
+Future works for this project would be to imrpove the robustness of our feature vector generation and capturing the temporal information, as explained 
+in the previous section. Additionally, we could explore extending this project to work at different locations on the court and for different people shooting.
+Lastly, we could explore the possibility of performing the prediction in real time, so that the results can be produced live instead of from a video recording.
 
 
 
