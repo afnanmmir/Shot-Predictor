@@ -11,3 +11,19 @@ References:
 [2] Cao, Z., Hidalgo, G., Simon, T., Wei, S., & Sheikh, Y. (2021). OpenPose: Realtime Multi-Person 2D Pose Estimation Using Part Affinity Fields. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43, 172-186.
 
 [3] J. Redmon, S. Divvala, R. Girshick and A. Farhadi, "You Only Look Once: Unified, Real-Time Object Detection," 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016, pp. 779-788, doi: 10.1109/CVPR.2016.91.
+
+---
+## How to Run Demo Code
+First, clone the repository with
+```bash
+git clone https://github.com/afnanmmir/Shot-Predictor.git
+```
+or
+```bash
+git clone git@github.com:afnanmmir/Shot-Predictor.git
+```
+Then, you should create a virtual environment to install required packages in. After creating and activating the virtual environment, run
+```bash
+pip install -r requirements.txt
+```
+to install the required packages. You can then run the demo code that is in the `models/demo/` directory. Make sure you run the code with the python kernel of the python environment that you just created.

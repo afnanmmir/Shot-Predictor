@@ -290,5 +290,5 @@ results/*
 *.aux
 *.mp4
 *.venv/
-models/rev1_catboost/catboost_info/*
-models/rev2_catboost/catboost_info/*
+catboost_info
+*.gif
